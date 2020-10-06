@@ -81,6 +81,7 @@ namespace TheNerdyBrewingCo.Api.Commands
             var data = JsonConvert.SerializeObject(config, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented
             });
 
             var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
