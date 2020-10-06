@@ -7,7 +7,6 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run: echo $NUGET_CONFIG | base64 --decode --ignore-garbage > ./nuget.config
       - run:
           name: Build
           command: |
