@@ -85,7 +85,7 @@ Task("Push")
             Source = "github",
         };
 
-        DotNetCoreNuGetPush($"{artifactsDirectory}/TheNerdyBrewingCo.Masstransit*.nupkg", settings);
+        DotNetCoreNuGetPush($"{artifactsDirectory}/Ocelot.ConfigBuilder*.nupkg", settings);
     });
 
 RunTarget(target);
