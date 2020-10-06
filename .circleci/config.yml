@@ -10,7 +10,7 @@ jobs:
       - run:
           name: Build
           command: |
-            withversion ./build.sh --buildNumber VERSION
+            withversion ./build.sh --buildNumber x.x.x
   push_release:
     working_directory: /thenerdybrewingco
     docker:
@@ -22,8 +22,8 @@ jobs:
           name: push tag
           command: |
             mkdir ./temp
-            withversion echo "VERSION" >> ./temp/buildno.txt
-            withversion ghr -u overtheairbrew --repository ${CIRCLE_PROJECT_REPONAME} "vVERSION" ./temp/
+            withversion echo "x.x.x" >> ./temp/buildno.txt
+            withversion ghr -u overtheairbrew --repository ${CIRCLE_PROJECT_REPONAME} "vx.x.x" ./temp/
 workflows:
   version: 2
   build_release:
