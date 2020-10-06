@@ -1,0 +1,40 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: "thenerdybrewingco/build:dotnet3.1.100-bionic"
+    working_directory: /overtheairbrew
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: echo $NUGET_CONFIG | base64 --decode --ignore-garbage > ./nuget.config
+      - run:
+          name: Build
+          command: |
+            withversion ./build.sh --buildNumber VERSION
+  push_release:
+    working_directory: /thenerdybrewingco
+    docker:
+      - image: thenerdybrewingco/build:dotnet3.1.100-bionic
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          name: push tag
+          command: |
+            mkdir ./temp
+            withversion echo "VERSION" >> ./temp/buildno.txt
+            withversion ghr -u overtheairbrew --repository ${CIRCLE_PROJECT_REPONAME} "vVERSION" ./temp/
+workflows:
+  version: 2
+  build_release:
+    jobs:
+      - build:
+          context: THENERDYBREWINGCO
+      - push_release:
+          context: THENERDYBREWINGCO
+          requires:
+            - build
+          filters:
+            tags:
+              only: master
