@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1</TargetFrameworks>
+    <PackageId>Ocelot.ConfigBuilder</PackageId>
+    <RepositoryUrl>https://github.com/overtheairbrew/Ocelot.ConfigBuilder</RepositoryUrl>
+    <Version>0.0.0-dev</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Oakton.AspNetCore" Version="2.1.3"/>
