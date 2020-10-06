@@ -24,6 +24,7 @@ jobs:
             mkdir ./temp
             withversion echo "x.x.x" >> ./temp/buildno.txt
             withversion ghr -u overtheairbrew --repository ${CIRCLE_PROJECT_REPONAME} "vx.x.x" ./temp/
+
 workflows:
   version: 2
   build_release:
