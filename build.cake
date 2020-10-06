@@ -71,10 +71,10 @@ Task("Package")
          var settings = new DotNetCorePackSettings
         {
             Configuration = "Release",
-            OutputDirectory = $"{artifactsDirectory}/{applicationName}"
+            OutputDirectory = $"{artifactsDirectory}"
         };
 
-        DotNetCorePack(buildCSProj, settings);
+        DotNetCorePack(srcDirectory, settings);
     });
 
 Task("Push")
@@ -85,7 +85,7 @@ Task("Push")
             Source = "github",
         };
 
-        DotNetCoreNuGetPush($"{artifactsDirectory}/{applicationName}/TheNerdyBrewingCo.Masstransit*.nupkg", settings);
+        DotNetCoreNuGetPush($"{artifactsDirectory}/TheNerdyBrewingCo.Masstransit*.nupkg", settings);
     });
 
 RunTarget(target);
