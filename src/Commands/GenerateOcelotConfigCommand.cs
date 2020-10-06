@@ -78,11 +78,10 @@ namespace TheNerdyBrewingCo.Api.Commands
 
             config.GlobalConfiguration.BaseUrl = ocelotBaseConfig.BaseUrl;
 
-            // var data = JsonConvert.SerializeObject(config, new JsonSerializerSettings
-            // {
-            //     NullValueHandling = NullValueHandling.Ignore,
-            //     Formatting = Formatting.None
-            // });
+            var data = JsonConvert.SerializeObject(config, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+            });
 
             var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
             var configmap = new Configmap
@@ -94,7 +93,7 @@ namespace TheNerdyBrewingCo.Api.Commands
                 },
             };
 
-            configmap.Data.Add("ocelot.json", config);
+            configmap.Data.Add("ocelot.json", data);
 
             var output = serializer.Serialize(configmap);
 
