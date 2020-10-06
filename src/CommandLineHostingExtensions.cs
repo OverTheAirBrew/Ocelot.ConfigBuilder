@@ -34,12 +34,22 @@ namespace Ocelot.ConfigBuilder
   public class OcelotConfigBuilderConfiguration : IOcelotConfigBuilderConfiguration
   {
     public string BaseUrl { get; set; }
+    public string OutputFileName { get; set; }
     public OcelotConfigBuilderDownstreamHost DownstreamHost { get; set; }
+    public KubernetesGeneration Kubernetes { get; set; }
   }
 
   public interface IOcelotConfigBuilderConfiguration
   {
     string BaseUrl { get; set; }
+    string OutputFileName { get; set; }
     OcelotConfigBuilderDownstreamHost DownstreamHost { get; set; }
+    KubernetesGeneration Kubernetes { get; set; }
+  }
+
+  public class KubernetesGeneration
+  {
+    public string Name { get; set; }
+    public string Namespace { get; set; }
   }
 }

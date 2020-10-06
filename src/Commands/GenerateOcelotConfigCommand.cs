@@ -1,3 +1,4 @@
+using System.IO;
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -8,6 +9,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Ocelot.ConfigBuilder;
 using Ocelot.ConfigBuilder.Models;
+using Ocelot.ConfigBuilder.Kubernetes;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 [assembly: Oakton.OaktonCommandAssembly]
 
@@ -74,10 +78,26 @@ namespace TheNerdyBrewingCo.Api.Commands
 
       config.GlobalConfiguration.BaseUrl = ocelotBaseConfig.BaseUrl;
 
-      Console.WriteLine(JsonConvert.SerializeObject(config, new JsonSerializerSettings
+      var data = JsonConvert.SerializeObject(config, new JsonSerializerSettings
       {
         NullValueHandling = NullValueHandling.Ignore
-      }));
+      });
+
+      var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
+      var configmap = new Configmap
+      {
+        Metadata = new ConfigmapMetadata
+        {
+          Name = ocelotBaseConfig.Kubernetes.Name,
+          Namespace = ocelotBaseConfig.Kubernetes.Namespace
+        },
+      };
+
+      configmap.Data.Add("ocelot.json", data);
+
+      var output = serializer.Serialize(configmap);
+
+      File.WriteAllText(ocelotBaseConfig.OutputFileName, output);
 
       return true;
     }

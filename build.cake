@@ -27,7 +27,9 @@ var srcDirectory = "./src/Ocelot.ConfigBuilder.csproj";
 Task("Default")
     .IsDependentOn("Clean")
     .IsDependentOn("Version")
-    .IsDependentOn("Build");
+    .IsDependentOn("Build")
+    .IsDependentOn("Package")
+    .IsDependentOn("Push");
 
 Task("Clean")
     .Does(() => {
@@ -62,6 +64,28 @@ Task("Build")
         };
 
         DotNetCoreBuild(srcDirectory, buildSettings);
+    });
+
+Task("Package")
+    .Does(() => {
+         var settings = new DotNetCorePackSettings
+        {
+            Configuration = "Release",
+            OutputDirectory = $"{artifactsDirectory}/{applicationName}"
+        };
+
+        DotNetCorePack(buildCSProj, settings);
+    });
+
+Task("Push")
+    .WithCriteria(IsRunningOnCircleCI())
+    .Does(() => {
+        var settings = new DotNetCoreNuGetPushSettings
+        {
+            Source = "github",
+        };
+
+        DotNetCoreNuGetPush($"{artifactsDirectory}/{applicationName}/TheNerdyBrewingCo.Masstransit*.nupkg", settings);
     });
 
 RunTarget(target);
