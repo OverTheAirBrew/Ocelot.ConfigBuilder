@@ -52,9 +52,9 @@ namespace TheNerdyBrewingCo.Api.Commands
 
                 var route = new OcelotConfigRoute
                 {
-                    DownstreamPathTemplate = downStreamRoute,
+                    DownstreamPathTemplate = $"/{downStreamRoute}",
                     DownstreamHostAndPorts = new List<OcelotConfigBuilderDownstreamHost> { ocelotBaseConfig.DownstreamHost },
-                    UpstreamPathTemplate = downStreamRoute,
+                    UpstreamPathTemplate = $"/{downStreamRoute}",
                     UpstreamHttpMethod = upstreamMethods,
                 };
 
