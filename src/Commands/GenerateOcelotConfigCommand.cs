@@ -46,15 +46,17 @@ namespace TheNerdyBrewingCo.Api.Commands
             {
                 var authRequired = group.Select(x => x.ActionDescriptor.EndpointMetadata.Where(y => y.GetType() == typeof(OcelotAuthenticationRequiredAttribute))).FirstOrDefault().FirstOrDefault() as OcelotAuthenticationRequiredAttribute;
                 var claimsToHeaders = group.Select(x => x.ActionDescriptor.EndpointMetadata.Where(y => y.GetType() == typeof(OcelotClaimToHeaderAttribute))).FirstOrDefault();
+                var upstreamUrl = group.Select(x => x.ActionDescriptor.EndpointMetadata.Where(y => y.GetType() == typeof(OcelotUpstreamUrl))).FirstOrDefault().FirstOrDefault() as OcelotUpstreamUrl;
 
                 var downStreamRoute = group.Key;
                 var upstreamMethods = group.Select(x => x.HttpMethod).ToArray();
+                var upstreamPath = upstreamUrl != null ? formatUrl(upstreamUrl.Url) : formatUrl(downStreamRoute);
 
                 var route = new OcelotConfigRoute
                 {
-                    DownstreamPathTemplate = $"/{downStreamRoute}",
+                    DownstreamPathTemplate = formatUrl(downStreamRoute),
                     DownstreamHostAndPorts = new List<OcelotConfigBuilderDownstreamHost> { ocelotBaseConfig.DownstreamHost },
-                    UpstreamPathTemplate = $"/{downStreamRoute}",
+                    UpstreamPathTemplate = upstreamPath,
                     UpstreamHttpMethod = upstreamMethods,
                 };
 
@@ -101,6 +103,12 @@ namespace TheNerdyBrewingCo.Api.Commands
             File.WriteAllText(ocelotBaseConfig.OutputFileName, output);
 
             return true;
+        }
+
+        public string formatUrl(string url)
+        {
+            if (url.Substring(0, 1) == "/") return url;
+            return $"/{url}";
         }
     }
 }
