@@ -18,97 +18,102 @@ using YamlDotNet.Serialization.NamingConventions;
 namespace TheNerdyBrewingCo.Api.Commands
 {
 
-    [Description("This will generate the ocelot config from the current api")]
-    public class GenerateOcelotConfigCommand : OaktonCommand<NetCoreInput>
+  [Description("This will generate the ocelot config from the current api")]
+  public class GenerateOcelotConfigCommand : OaktonCommand<NetCoreInput>
+  {
+    public override bool Execute(NetCoreInput input)
     {
-        public override bool Execute(NetCoreInput input)
+      var host = input.BuildHost();
+      var serviceType = typeof(IApiDescriptionGroupCollectionProvider);
+
+      var ocelotBaseConfig = host.Services.GetService(typeof(IOcelotConfigBuilderConfiguration)) as IOcelotConfigBuilderConfiguration;
+
+      if (!(host.Services.GetService(serviceType) is IApiDescriptionGroupCollectionProvider explorer))
+        return true;
+
+      var results = explorer
+        .ApiDescriptionGroups
+        .Items
+        .SelectMany(x => x.Items);
+
+      var grouped = results.GroupBy(r => r.RelativePath);
+
+      var config = new OcelotConfig()
+      {
+      };
+
+      foreach (var group in grouped)
+      {
+        var ocelotRoute = group.Select(x => x.ActionDescriptor.EndpointMetadata.Where(y => y.GetType() == typeof(OcelotRoute))).FirstOrDefault().FirstOrDefault() as OcelotRoute;
+
+        if (ocelotRoute == null) continue;
+
+        var claimsToHeaders = group.Select(x => x.ActionDescriptor.EndpointMetadata.Where(y => y.GetType() == typeof(OcelotClaimToHeaderAttribute))).FirstOrDefault();
+
+        var downStreamRoute = group.Key;
+        var upstreamMethods = group.Select(x => x.HttpMethod).ToArray();
+
+        // var upstreamPath = upstreamUrl != null ? formatUrl(upstreamUrl.Url, ocelotBaseConfig.PrefixToRemove) : formatUrl(downStreamRoute, ocelotBaseConfig.PrefixToRemove);
+
+        var route = new OcelotConfigRoute
         {
-            var host = input.BuildHost();
-            var serviceType = typeof(IApiDescriptionGroupCollectionProvider);
+          DownstreamPathTemplate = formatUrl(downStreamRoute),
+          DownstreamHostAndPorts = new List<OcelotConfigBuilderDownstreamHost> { ocelotBaseConfig.DownstreamHost },
+          UpstreamPathTemplate = formatUrl(ocelotRoute.OcelotTemplate),
+          UpstreamHttpMethod = upstreamMethods,
+        };
 
-            var ocelotBaseConfig = host.Services.GetService(typeof(IOcelotConfigBuilderConfiguration)) as IOcelotConfigBuilderConfiguration;
+        foreach (var claim in claimsToHeaders)
+        {
+          var castClaim = claim as OcelotClaimToHeaderAttribute;
 
-            if (!(host.Services.GetService(serviceType) is IApiDescriptionGroupCollectionProvider explorer))
-                return true;
-
-            var results = explorer
-              .ApiDescriptionGroups
-              .Items
-              .SelectMany(x => x.Items);
-
-            var grouped = results.GroupBy(r => r.RelativePath);
-
-            var config = new OcelotConfig()
-            {
-            };
-
-            foreach (var group in grouped)
-            {
-                var authRequired = group.Select(x => x.ActionDescriptor.EndpointMetadata.Where(y => y.GetType() == typeof(OcelotAuthenticationRequiredAttribute))).FirstOrDefault().FirstOrDefault() as OcelotAuthenticationRequiredAttribute;
-                var claimsToHeaders = group.Select(x => x.ActionDescriptor.EndpointMetadata.Where(y => y.GetType() == typeof(OcelotClaimToHeaderAttribute))).FirstOrDefault();
-                var upstreamUrl = group.Select(x => x.ActionDescriptor.EndpointMetadata.Where(y => y.GetType() == typeof(OcelotUpstreamUrl))).FirstOrDefault().FirstOrDefault() as OcelotUpstreamUrl;
-
-                var downStreamRoute = group.Key;
-                var upstreamMethods = group.Select(x => x.HttpMethod).ToArray();
-                var upstreamPath = upstreamUrl != null ? formatUrl(upstreamUrl.Url) : formatUrl(downStreamRoute);
-
-                var route = new OcelotConfigRoute
-                {
-                    DownstreamPathTemplate = formatUrl(downStreamRoute),
-                    DownstreamHostAndPorts = new List<OcelotConfigBuilderDownstreamHost> { ocelotBaseConfig.DownstreamHost },
-                    UpstreamPathTemplate = upstreamPath,
-                    UpstreamHttpMethod = upstreamMethods,
-                };
-
-                foreach (var claim in claimsToHeaders)
-                {
-                    var castClaim = claim as OcelotClaimToHeaderAttribute;
-
-                    route.AddHeadersToRequest.Add(castClaim.HeaderName, $"Claims[{castClaim.Claim}]>{castClaim.ValuePath}".Trim());
-                }
-
-                if (authRequired != null)
-                {
-                    route.AuthenticationOptions = new OcelotConfigRouteAuthOptions
-                    {
-                        AuthenticationProviderKey = authRequired.ProviderKey
-                    };
-                }
-
-                config.Routes.Add(route);
-            }
-
-            config.GlobalConfiguration.BaseUrl = ocelotBaseConfig.BaseUrl;
-
-            var data = JsonConvert.SerializeObject(config, new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented
-            });
-
-            var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
-            var configmap = new Configmap
-            {
-                Metadata = new ConfigmapMetadata
-                {
-                    Name = ocelotBaseConfig.Kubernetes.Name,
-                    Namespace = ocelotBaseConfig.Kubernetes.Namespace
-                },
-            };
-
-            configmap.Data.Add("ocelot.json", data);
-
-            var output = serializer.Serialize(configmap);
-
-            File.WriteAllText(ocelotBaseConfig.OutputFileName, output);
-
-            return true;
+          route.AddHeadersToRequest.Add(castClaim.HeaderName, $"Claims[{castClaim.Claim}]>{castClaim.ValuePath}".Trim());
         }
 
-        public string formatUrl(string url)
+        if (ocelotRoute.AuthenticationProvider != null)
         {
-            if (url.Substring(0, 1) == "/") return url;
-            return $"/{url}";
+          route.AuthenticationOptions = new OcelotConfigRouteAuthOptions
+          {
+            AuthenticationProviderKey = ocelotRoute.AuthenticationProvider
+          };
         }
+
+        config.Routes.Add(route);
+      }
+
+      config.GlobalConfiguration.BaseUrl = ocelotBaseConfig.BaseUrl;
+
+      var data = JsonConvert.SerializeObject(config, new JsonSerializerSettings
+      {
+        NullValueHandling = NullValueHandling.Ignore,
+        Formatting = Formatting.Indented
+      });
+
+      Console.WriteLine(data);
+
+      var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
+      var configmap = new Configmap
+      {
+        Metadata = new ConfigmapMetadata
+        {
+          Name = ocelotBaseConfig.Kubernetes.Name,
+          Namespace = ocelotBaseConfig.Kubernetes.Namespace
+        },
+      };
+
+      configmap.Data.Add("ocelot.json", data);
+
+      var output = serializer.Serialize(configmap);
+
+      File.WriteAllText(ocelotBaseConfig.OutputFileName, output);
+
+      return true;
     }
+
+    public string formatUrl(string url)
+    {
+      if (url.Substring(0, 1) == "/") return url;
+      return $"/{url}";
+    }
+  }
 }

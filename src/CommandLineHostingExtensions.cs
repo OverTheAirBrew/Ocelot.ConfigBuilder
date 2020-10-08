@@ -35,6 +35,7 @@ namespace Ocelot.ConfigBuilder
   {
     public string BaseUrl { get; set; }
     public string OutputFileName { get; set; }
+    public string PrefixToRemove { get; set; }
     public OcelotConfigBuilderDownstreamHost DownstreamHost { get; set; }
     public KubernetesGeneration Kubernetes { get; set; }
   }
@@ -43,6 +44,7 @@ namespace Ocelot.ConfigBuilder
   {
     string BaseUrl { get; set; }
     string OutputFileName { get; set; }
+    string PrefixToRemove { get; set; }
     OcelotConfigBuilderDownstreamHost DownstreamHost { get; set; }
     KubernetesGeneration Kubernetes { get; set; }
   }
