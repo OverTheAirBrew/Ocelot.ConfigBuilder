@@ -27,7 +27,7 @@ In your `Startup.cs` include the followin in your `ConfigureService`
 services.UseOcelotConfigBuilder(new OcelotConfigBuilderConfiguration
     {
     BaseUrl = "{your gateway url}",
-    OutputFileName = "{your output location of the file},
+    OutputFileName = "{your output location of the file}",
     DownstreamHost = new OcelotConfigBuilderDownstreamHost("{your downstream host}", 80),
     Kubernetes = new KubernetesGeneration
     {
