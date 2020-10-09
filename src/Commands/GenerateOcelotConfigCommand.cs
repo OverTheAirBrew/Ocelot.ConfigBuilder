@@ -81,7 +81,7 @@ namespace TheNerdyBrewingCo.Api.Commands
                     route.AddHeadersToRequest.Add(castClaim.HeaderName, $"Claims[{castClaim.Claim}]>{castClaim.ValuePath}".Trim());
                 }
 
-                if (ocelotRoute.AuthenticationProvider != null)
+                if (ocelotRoute.AuthenticationProvider != null && !string.IsNullOrWhiteSpace(ocelotRoute.AuthenticationProvider))
                 {
                     route.AuthenticationOptions = new OcelotConfigRouteAuthOptions
                     {
