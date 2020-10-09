@@ -38,3 +38,6 @@ services.UseOcelotConfigBuilder(new OcelotConfigBuilderConfiguration
 ```
 
 You will ofcourse need some method of reloading the ocelot configuration on the fly inside the kube cluster. As the default .net file provider cannot reload this due to symlinks i would suggest looking at https://github.com/fbeltrao/ConfigMapFileProvider
+
+## Running
+Once everything is set up you should be able to run `dotnet run generateocelotconfig` and it will output a file at your given location
