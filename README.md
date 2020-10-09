@@ -15,7 +15,7 @@ This allows you to add the `ClaimsToHeader` section of your ocelot configiration
 [ApiExplorerSettings(IgnoreApi = false)]
 [OcelotRoute("api/downstreamroute", "downstreamroute", "authprovider")]
 [OcelotClaimToHeader("UserId", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "value")]
-public class BeersController : ControllerBase
+public class ExampleController : ControllerBase
 ```
 
 You need to make sure that the `ApiExplorerSettings` attribute is provided so the underlying api can pic up the routes
