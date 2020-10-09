@@ -18,7 +18,7 @@ This allows you to add the `ClaimsToHeader` section of your ocelot configiration
 public class ExampleController : ControllerBase
 ```
 
-You need to make sure that the `ApiExplorerSettings` attribute is provided so the underlying api can pic up the routes
+You need to make sure that the `ApiExplorerSettings` attribute is provided so the underlying api can pick up the routes
 
 In your `Program.cs` replace `build()` with ` .UseOcelotConfig(args);`
 In your `Startup.cs` include the followin in your `ConfigureService`
@@ -27,7 +27,7 @@ In your `Startup.cs` include the followin in your `ConfigureService`
 services.UseOcelotConfigBuilder(new OcelotConfigBuilderConfiguration
     {
     BaseUrl = "{your gateway url}",
-    OutputFileName = "{your output location of the gile},
+    OutputFileName = "{your output location of the file},
     DownstreamHost = new OcelotConfigBuilderDownstreamHost("{your downstream host}", 80),
     Kubernetes = new KubernetesGeneration
     {
