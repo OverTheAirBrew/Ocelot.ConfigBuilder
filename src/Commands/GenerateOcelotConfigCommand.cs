@@ -92,7 +92,11 @@ namespace TheNerdyBrewingCo.Api.Commands
                 config.Routes.Add(route);
             }
 
-            config.GlobalConfiguration.BaseUrl = ocelotBaseConfig.BaseUrl;
+            if(!ocelotBaseConfig.GenerateGlobalConfiguration){
+                config.GlobalConfiguration = null;
+            }else{
+                config.GlobalConfiguration.BaseUrl = ocelotBaseConfig.BaseUrl;
+            }
 
             var data = JsonConvert.SerializeObject(config, new JsonSerializerSettings
             {
