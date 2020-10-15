@@ -116,7 +116,7 @@ namespace TheNerdyBrewingCo.Api.Commands
                 },
             };
 
-            configmap.Data.Add("ocelot.json", data);
+            configmap.Data.Add("ocelot.api.json", data);
 
             var output = serializer.Serialize(configmap);
 
